@@ -2,9 +2,11 @@ package com.tomli.progressapp
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,7 +25,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -44,15 +48,20 @@ import androidx.compose.ui.window.Dialog
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.tomli.progressapp.databases.ProgressViewModel
+import com.tomli.progressapp.databases.Themes
 import com.tomli.progressapp.ui.theme.ProgressAppTheme
 
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
     val themes = progressViewModel.themes.collectAsState(initial = emptyList())
     val up = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val down = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val isCreate = remember{ mutableStateOf(false)}
+    val isChange=remember{ mutableStateOf(false)}
+    val isDelete=remember{ mutableStateOf(false)}
+    val changingTheme = remember { mutableStateOf(Themes(0, "name", "color")) }
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
         Box(modifier = Modifier.fillMaxWidth().background(Color.Black)){
             Image(painter = painterResource(R.drawable.button_more), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterStart))
@@ -62,30 +71,46 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                     //progressViewModel.addNewTheme("theme", "0")
                 })
         }
-        LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(2.dp)){
+        LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = themes.value) { item ->
                 Column(modifier = Modifier
-                    .padding(5.dp).clickable {}){
+                    .padding(5.dp).combinedClickable(enabled = true, onClick = {},onLongClick = {
+                        isChange.value=true
+                        changingTheme.value=item.copy()
+                    })){
                     Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(80.dp)) //item.color?.toInt(16)!!)
                     Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }
         }
         if(isCreate.value){
-            ThemeCreateDialog({isCreate.value=false})
+            ThemeDialog(Themes(0, "Новая тема", "Red"), false, {isCreate.value=false})
         }
-
+        if(isChange.value){
+            ThemeDialog(changingTheme.value, true, {isChange.value=false})
+        }
     }
 }
 
-
+//создание и редактирование
 @Composable
-fun ThemeCreateDialog(onDismiss:()-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
-    var name = remember { mutableStateOf(TextFieldValue("Новая тема")) }
-    var colorIndex = remember { mutableStateOf(0) }
+fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
+    val name = remember { mutableStateOf(TextFieldValue(theme.name_theme!!)) }
+    val colorIndex = remember { mutableStateOf(ColorsData.valueOf(theme.color!!).ordinal) }
+    val heightCard: Int
+    if(isChange){
+        heightCard=350
+    }else{
+        heightCard=300
+    }
+    val isDelete= remember { mutableStateOf(false) }
     Dialog(onDismissRequest = onDismiss) {
-        Card(modifier = Modifier.width(400.dp).height(300.dp).padding(16.dp), shape = RoundedCornerShape(5.dp)){
-            Text(text="Создание новой темы", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
+        Card(modifier = Modifier.width(400.dp).height(heightCard.dp).padding(16.dp), shape = RoundedCornerShape(5.dp)){
+            if(!isChange){
+                Text(text="Создание новой темы", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
+            }else{
+                Text(text="Редактирование темы", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
+            }
             Row(modifier = Modifier.padding(start=10.dp, end=10.dp)){
                 Text(text="Название: ", modifier = Modifier.align(Alignment.CenterVertically))
                 OutlinedTextField(value = name.value, onValueChange = {newText -> name.value = newText}, modifier = Modifier, singleLine = true,)
@@ -104,31 +129,66 @@ fun ThemeCreateDialog(onDismiss:()-> Unit, progressViewModel: ProgressViewModel=
                     }
                 }
             }
-            Row(modifier = Modifier.padding(10.dp).height(200.dp).fillMaxWidth()){
+            Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
                 Card(modifier = Modifier.weight(1f).padding(5.dp)
-                    .clickable { onDismiss() }, shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
+                    .clickable { onDismiss() }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
                     Text(text="Отменить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
                 }
-                Card(modifier = Modifier.weight(1f).padding(5.dp)
-                    .clickable {
-                        progressViewModel.addNewTheme(name.value.text, ColorsData.entries.get(colorIndex.value).name)
-                        onDismiss()
-                    }, shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
-                    Text(text="Создать", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                if(!isChange){
+                    Card(modifier = Modifier.weight(1f).padding(5.dp)
+                        .clickable {
+                            progressViewModel.addNewTheme(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            onDismiss()
+                        }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
+                        Text(text="Создать", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                    }
+                }else{
+                    Card(modifier = Modifier.weight(1f).padding(5.dp)
+                        .clickable {
+                            progressViewModel.changeTheme(theme.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            onDismiss()
+                        }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
+                        Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                    }
                 }
+            }
+            if(isChange){
+                Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
+                    Card(modifier = Modifier.weight(1f).padding(5.dp)
+                        .clickable { isDelete.value=true }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
+                        Text(text="Удалить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                    }
+                }
+            }
+            if(isDelete.value){
+                AlertDialog(onDismissRequest = {isDelete.value=false},
+                    title = {Text(text="Удалить тему?")},
+                    text = {Text(text="Все записи внутри неё будут также удалены")},
+                    confirmButton = {Text(text = "Удалить", modifier = Modifier.padding(5.dp)
+                        .clickable { progressViewModel.deleteTheme(theme.id!!); isDelete.value=false; onDismiss()})},
+                    dismissButton = {Text(text = "Отменить", modifier = Modifier.padding(5.dp)
+                        .clickable { isDelete.value=false})})
             }
 
 
+            /*if(isChange){
+                Card(modifier = Modifier.height(200.dp).width(500.dp).padding(5.dp).background(Color(0x3eff0000))
+                    .clickable { onDismiss() }, shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
+                    Text(text="Удалить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                }
+            }*/
         }
     }
 }
+
+
 
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     ProgressAppTheme {
-        ThemeCreateDialog({})
+        //ThemeChangeDialog(Themes(0, "n", "Pink"),{})
     }
 }
 

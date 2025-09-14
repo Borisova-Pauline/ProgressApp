@@ -15,6 +15,14 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
         database.dao.addTheme(name, color)
     }
 
+    fun changeTheme(id: Int, name: String, color: String) = viewModelScope.launch {
+        database.dao.changeTheme(id, name, color)
+    }
+
+    fun deleteTheme(id: Int) = viewModelScope.launch {
+        database.dao.deleteTheme(id)
+    }
+
 
 
     companion object{

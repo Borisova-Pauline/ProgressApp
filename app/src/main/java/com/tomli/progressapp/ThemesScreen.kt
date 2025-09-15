@@ -60,7 +60,6 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
     val down = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val isCreate = remember{ mutableStateOf(false)}
     val isChange=remember{ mutableStateOf(false)}
-    val isDelete=remember{ mutableStateOf(false)}
     val changingTheme = remember { mutableStateOf(Themes(0, "name", "color")) }
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
         Box(modifier = Modifier.fillMaxWidth().background(Color.Black)){
@@ -68,7 +67,6 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
             Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterEnd)
                 .clickable{
                     isCreate.value=true
-                    //progressViewModel.addNewTheme("theme", "0")
                 })
         }
         LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){

@@ -32,4 +32,15 @@ interface Dao {
     suspend fun updateCurrentCount(id: Int, current_count: Int)
     @Query("update counter set max_count=:max_count where id=:id")
     suspend fun changeMaxCount(id: Int, max_count: Int)
+
+    @Query("select * from check_list where id_scale=:id_scale")
+    fun allCheckListOneScale(id_scale: Int): Flow<List<CheckList>>
+    @Query("insert into check_list (id_scale, done, text) values (:id_scale, 0, :text)")
+    suspend fun addCheckList(id_scale: Int, text: String)
+    @Query("update check_list set done=:done where id=:id")
+    suspend fun changeDoneCheckList(id: Int, done: Int)
+    @Query("update check_list set text=:text where id=:id")
+    suspend fun changeTextCheckList(id: Int, text: String)
+    @Query("delete from check_list where id=:id")
+    suspend fun deleteCheckList(id: Int)
 }

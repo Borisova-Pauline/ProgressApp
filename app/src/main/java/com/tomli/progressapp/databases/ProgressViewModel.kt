@@ -47,6 +47,22 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
         database.dao.changeMaxCount(id, max_count)
     }
 
+    fun getCheckList(id_scale: Int): Flow<List<CheckList>>{
+        return database.dao.allCheckListOneScale(id_scale)
+    }
+    fun addNewCheckList(id_scale: Int, text: String)=viewModelScope.launch {
+        database.dao.addCheckList(id_scale, text)
+    }
+    fun changeDoneCheckList(id: Int, done: Int)=viewModelScope.launch {
+        database.dao.changeDoneCheckList(id, done)
+    }
+    fun changeTextCheckList(id: Int, text: String)=viewModelScope.launch {
+        database.dao.changeTextCheckList(id, text)
+    }
+    fun deleteCheckList(id: Int)=viewModelScope.launch {
+        database.dao.deleteCheckList(id)
+    }
+
 
     companion object{
         val factory: ViewModelProvider.Factory= object : ViewModelProvider.Factory {

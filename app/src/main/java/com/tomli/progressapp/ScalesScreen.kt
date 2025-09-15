@@ -90,6 +90,9 @@ fun ScalesScreen(navController: NavController, id: Int, progressViewModel: Progr
                     })){
                     Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(50.dp))
                     Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally))
+                    if(item.type==TypeScale.Counter.name && progressViewModel.getCounter(item.id!!).collectAsState(initial = emptyList()).value.isEmpty()){
+                        progressViewModel.addNewCounter(item.id, 0, 10)
+                    }
                 }
             }
         }
@@ -99,7 +102,8 @@ fun ScalesScreen(navController: NavController, id: Int, progressViewModel: Progr
         if(isChange.value){
             ScaleDialog(changingScale.value, true, {isChange.value=false}, {name, color, maxCount ->  progressViewModel.getOneScaleCounterType(id, name, color)
                 Thread.sleep(400)
-                progressViewModel.addNewCounter(progressViewModel.oneScaleCounterType.id!!, 0, maxCount)})
+                progressViewModel.addNewCounter(progressViewModel.oneScaleCounterType.id!!, 0, maxCount)
+            })
         }
     }
 }

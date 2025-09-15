@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.Flow
 interface Dao {
     @Query("select * from themes")
     fun allThemes(): Flow<List<Themes>>
+    @Query("select * from themes where id=:id")
+    suspend fun oneTheme(id: Int): Themes
     @Query("insert into themes (name_theme, color) values (:name, :color)")
     suspend fun addTheme(name: String, color: String)
     @Query("delete from themes where id=:id")
@@ -17,6 +19,8 @@ interface Dao {
 
     @Query("select * from scales where id_theme=:id_theme")
     fun allScalesOneTheme(id_theme: Int?): Flow<List<Scales>>
+    @Query("select * from scales where id_theme=:id_theme and type='Counter' and name_scale=:name and color=:color")
+    suspend fun oneScaleCounterType(id_theme: Int, name: String, color: String): Scales
     @Query("insert into scales (id_theme, name_scale, color, type) values (:id_theme, :name_scale, :color, :type)")
     suspend fun addScale(id_theme: Int, name_scale: String, color: String, type: String)
     @Query("delete from scales where id=:id")

@@ -72,7 +72,9 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
         LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = themes.value) { item ->
                 Column(modifier = Modifier
-                    .padding(5.dp).combinedClickable(enabled = true, onClick = {},onLongClick = {
+                    .padding(5.dp).combinedClickable(enabled = true, onClick = {
+                        navController.navigate("scales_screen/${item.id}")
+                    },onLongClick = {
                         isChange.value=true
                         changingTheme.value=item.copy()
                     })){
@@ -167,28 +169,10 @@ fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, progressV
                     dismissButton = {Text(text = "Отменить", modifier = Modifier.padding(5.dp)
                         .clickable { isDelete.value=false})})
             }
-
-
-            /*if(isChange){
-                Card(modifier = Modifier.height(200.dp).width(500.dp).padding(5.dp).background(Color(0x3eff0000))
-                    .clickable { onDismiss() }, shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
-                    Text(text="Удалить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
-                }
-            }*/
         }
     }
 }
 
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ProgressAppTheme {
-        //ThemeChangeDialog(Themes(0, "n", "Pink"),{})
-    }
-}
 
 
 

@@ -14,9 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.tomli.progressapp.ui.theme.ProgressAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -42,5 +44,10 @@ fun ComposeNavigation() {
         composable("main_screen") {
             ThemesScreen(navController = navController)
         }
+        composable("scales_screen/{id}", arguments = listOf(navArgument("id") {type = NavType.IntType})){
+                navBackStack ->  val id: Int = navBackStack.arguments?.getInt("id") ?: 1
+            ScalesScreen(navController = navController, id)
+        }
+
     }
 }

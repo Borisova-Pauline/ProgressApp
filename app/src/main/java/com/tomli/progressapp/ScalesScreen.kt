@@ -57,60 +57,86 @@ import com.tomli.progressapp.ui.theme.ProgressAppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun ScalesScreen(navController: NavController, id: Int, progressViewModel: ProgressViewModel = viewModel(factory = ProgressViewModel.factory)) {
+fun ScalesScreen(navController: NavController, id: Int, name: String, color: String, progressViewModel: ProgressViewModel = viewModel(factory = ProgressViewModel.factory)) {
+    var name_theme= remember { mutableStateOf(name) }
+    var color_theme= remember { mutableStateOf(color) }
     val scales = progressViewModel.getScalesOneTheme(id).collectAsState(initial = emptyList())
     val up = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val down = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+    val isThemeChange = remember{ mutableStateOf(false)}
     val isCreate = remember{ mutableStateOf(false)}
     val isChange=remember{ mutableStateOf(false)}
     val changingScale = remember { mutableStateOf(Scales(0, id, "Новая шкала", "Red", TypeScale.CheckList.name)) }
-    progressViewModel.getOneTheme(id)
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
-        Row(modifier = Modifier.fillMaxWidth().background(Color.Black).height(60.dp)){
-            Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
+        Row(modifier = Modifier.fillMaxWidth().background(Color(ColorsData.valueOf(color_theme.value).hex)).height(60.dp)){
+            if(isLightColor(color_theme.value)){
+                Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
+                    Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
 
-            Text(text = "${progressViewModel.oneTheme.name_theme}", color = Color.White,
-                modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_theme.value, color = Color.Black,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
 
-            Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
-                .clickable{
-                    isCreate.value=true
-                    //progressViewModel.addNewScale(id, "new", "Red", TypeScale.Counter.name)
-                })
+                Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
+                    .clickable{
+                        isThemeChange.value=true
+                    })
+
+                Image(painter = painterResource(R.drawable.button_add_black), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
+                    .clickable{
+                        isCreate.value=true
+                    })
+            }else{
+                Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
+                    Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
+
+                Text(text = name_theme.value, color = Color.White,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+
+                Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
+                    .clickable{
+                        isThemeChange.value=true
+                    })
+
+                Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
+                    .clickable{
+                        isCreate.value=true
+                    })
+            }
+
         }
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = scales.value) { item ->
                 Column(modifier = Modifier
                     .padding(5.dp).fillMaxWidth().combinedClickable(enabled = true, onClick = {
-
+                        if(item.type==TypeScale.Counter.name){
+                            navController.navigate("counter_screen/${item.id}/${item.name_scale}/${item.color}")
+                        }else{
+                            navController.navigate("main_screen")
+                        }
                     },onLongClick = {
                         changingScale.value = item.copy()
                         isChange.value=true
                     })){
                     Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(50.dp))
                     Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally))
-                    if(item.type==TypeScale.Counter.name && progressViewModel.getCounter(item.id!!).collectAsState(initial = emptyList()).value.isEmpty()){
-                        progressViewModel.addNewCounter(item.id, 0, 10)
-                    }
                 }
             }
         }
+        if(isThemeChange.value){
+            ThemeDialog(Themes(id, name_theme.value, color_theme.value), true, {isThemeChange.value=false}, true, {newName, newColor ->  name_theme.value=newName; color_theme.value=newColor})
+        }
         if(isCreate.value){
-            ScaleDialog(Scales(0, id,"Новая шкала", "Red", TypeScale.CheckList.name), false, {isCreate.value=false}, {name, color, maxColor ->})
+            ScaleDialog(Scales(0, id,"Новая шкала", "Red", TypeScale.CheckList.name), false, {isCreate.value=false}, false, {_, _ ->  })
         }
         if(isChange.value){
-            ScaleDialog(changingScale.value, true, {isChange.value=false}, {name, color, maxCount ->  progressViewModel.getOneScaleCounterType(id, name, color)
-                Thread.sleep(400)
-                progressViewModel.addNewCounter(progressViewModel.oneScaleCounterType.id!!, 0, maxCount)
-            })
+            ScaleDialog(changingScale.value, true, {isChange.value=false}, false, {_, _ ->  })
         }
     }
 }
 
 
 @Composable
-fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, onCounterCreate:(name: String, color: String, maxCount: Int)-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
+fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeInside: Boolean, onReturnChanges:(newName: String, newColor: String)-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
     val name = remember { mutableStateOf(TextFieldValue(scale.name_scale!!)) }
     val colorIndex = remember { mutableStateOf(ColorsData.valueOf(scale.color!!).ordinal) }
     val heightCard: Int
@@ -118,8 +144,12 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, onCounter
     val isCounter = remember { mutableStateOf(false) }
     val maxCount = remember { mutableStateOf("10") }
     if(isChange){
-        heightCard=350
-    }else{
+        if(isChangeInside){
+            heightCard=300
+        }else{
+            heightCard=350
+        }
+    } else{
         if(isCounter.value){
             heightCard=450
         }else{
@@ -182,13 +212,10 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, onCounter
                 if(!isChange){
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
-                            var type = TypeScale.CheckList.name
                             if(isCounter.value){
-                                type = TypeScale.Counter.name
-                            }
-                            progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, type)
-                            if(isCounter.value){
-                                onCounterCreate(name.value.text, ColorsData.entries.get(colorIndex.value).name, maxCount.value.toInt())
+                                progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.Counter.name, maxCount.value.toInt())
+                            }else{
+                                progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.CheckList.name)
                             }
                             onDismiss()
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
@@ -199,6 +226,9 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, onCounter
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
                             progressViewModel.changeScale(scale.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            if(isChangeInside){
+                                onReturnChanges(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            }
                             onDismiss()
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
                     ){
@@ -206,7 +236,7 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, onCounter
                     }
                 }
             }
-            if(isChange){
+            if(isChange && !isChangeInside){
                 Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable { isDelete.value=true }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){

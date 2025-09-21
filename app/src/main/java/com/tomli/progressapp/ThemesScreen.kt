@@ -73,7 +73,7 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
             items(items = themes.value) { item ->
                 Column(modifier = Modifier
                     .padding(5.dp).combinedClickable(enabled = true, onClick = {
-                        navController.navigate("scales_screen/${item.id}")
+                        navController.navigate("scales_screen/${item.id}/${item.name_theme}/${item.color}")
                     },onLongClick = {
                         isChange.value=true
                         changingTheme.value=item.copy()
@@ -84,21 +84,21 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
             }
         }
         if(isCreate.value){
-            ThemeDialog(Themes(0, "Новая тема", "Red"), false, {isCreate.value=false})
+            ThemeDialog(Themes(0, "Новая тема", "Red"), false, {isCreate.value=false}, false, { _, _ ->  })
         }
         if(isChange.value){
-            ThemeDialog(changingTheme.value, true, {isChange.value=false})
+            ThemeDialog(changingTheme.value, true, {isChange.value=false}, false, {_, _ ->  })
         }
     }
 }
 
 //создание и редактирование
 @Composable
-fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
+fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, isChangeInside: Boolean, onReturnChanges:(newName: String, newColor: String)-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
     val name = remember { mutableStateOf(TextFieldValue(theme.name_theme!!)) }
     val colorIndex = remember { mutableStateOf(ColorsData.valueOf(theme.color!!).ordinal) }
     val heightCard: Int
-    if(isChange){
+    if(isChange && !isChangeInside){
         heightCard=350
     }else{
         heightCard=300
@@ -146,13 +146,16 @@ fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, progressV
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
                             progressViewModel.changeTheme(theme.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            if(isChangeInside){
+                                onReturnChanges(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            }
                             onDismiss()
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
                         Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
                     }
                 }
             }
-            if(isChange){
+            if(isChange && !isChangeInside){
                 Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable { isDelete.value=true }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){

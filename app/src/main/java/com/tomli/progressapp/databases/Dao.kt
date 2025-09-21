@@ -19,8 +19,8 @@ interface Dao {
 
     @Query("select * from scales where id_theme=:id_theme")
     fun allScalesOneTheme(id_theme: Int?): Flow<List<Scales>>
-    @Query("select * from scales where id_theme=:id_theme and type='Counter' and name_scale=:name and color=:color")
-    suspend fun oneScaleCounterType(id_theme: Int, name: String, color: String): Scales
+    @Query("select id from scales where id_theme=:id_theme and type='Counter' and name_scale=:name and color=:color")
+    suspend fun oneScaleCounterType(id_theme: Int, name: String, color: String): Int
     @Query("insert into scales (id_theme, name_scale, color, type) values (:id_theme, :name_scale, :color, :type)")
     suspend fun addScale(id_theme: Int, name_scale: String, color: String, type: String)
     @Query("delete from scales where id=:id")

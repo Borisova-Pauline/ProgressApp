@@ -7,13 +7,14 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tomli.progressapp.Applic
+import com.tomli.progressapp.TypeScale
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 
 class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
     val themes=database.dao.allThemes()
 
-    var oneTheme = Themes(0, " ", "Red")
+    var oneTheme = Themes(0, " ", "Black")
     fun getOneTheme(id: Int)= viewModelScope.launch {
         oneTheme = database.dao.oneTheme(id)
     }
@@ -27,15 +28,18 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
         database.dao.deleteTheme(id)
     }
 
-    var oneScaleCounterType = Scales(0, 0," ", "Red", "Counter")
-    fun getOneScaleCounterType(id_theme: Int, name: String, color: String)= viewModelScope.launch {
-        oneScaleCounterType = database.dao.oneScaleCounterType(id_theme, name, color)
-    }
+
+
     fun getScalesOneTheme(id_theme: Int): Flow<List<Scales>> {
         return database.dao.allScalesOneTheme(id_theme)
     }
     fun addNewScale(id_theme: Int, name_scale: String, color: String, type: String) = viewModelScope.launch {
         database.dao.addScale(id_theme, name_scale, color, type)
+    }
+    fun addNewScale(id_theme: Int, name_scale: String, color: String, type: String, maxCount: Int) = viewModelScope.launch {
+        database.dao.addScale(id_theme, name_scale, color, type)
+        var id = database.dao.oneScaleCounterType(id_theme, name_scale, color)
+        database.dao.addCounter(id,0, maxCount)
     }
     fun deleteScale(id: Int) = viewModelScope.launch {
         database.dao.deleteScale(id)

@@ -19,6 +19,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.tomli.progressapp.databases.Themes
 import com.tomli.progressapp.ui.theme.ProgressAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,6 +34,14 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+fun isLightColor(color: String): Boolean{
+    var isLight = false
+    if(color=="Yellow"){
+        isLight=true
+    }
+    return isLight
+}
+
 
 @Composable
 fun ComposeNavigation() {
@@ -44,10 +53,19 @@ fun ComposeNavigation() {
         composable("main_screen") {
             ThemesScreen(navController = navController)
         }
-        composable("scales_screen/{id}", arguments = listOf(navArgument("id") {type = NavType.IntType})){
+        composable("scales_screen/{id}/{name}/{color}", arguments = listOf(navArgument("id") {type = NavType.IntType},
+            navArgument("name") {type = NavType.StringType}, navArgument("color"){type=NavType.StringType})){
                 navBackStack ->  val id: Int = navBackStack.arguments?.getInt("id") ?: 1
-            ScalesScreen(navController = navController, id)
+            val name: String = navBackStack.arguments?.getString("name") ?: " "
+            val color: String = navBackStack.arguments?.getString("color") ?: "Black"
+            ScalesScreen(navController = navController, id, name, color)
         }
-
+        composable("counter_screen/{id}/{name}/{color}", arguments = listOf(navArgument("id") {type = NavType.IntType},
+            navArgument("name") {type = NavType.StringType}, navArgument("color"){type=NavType.StringType})){
+                navBackStack ->  val id: Int = navBackStack.arguments?.getInt("id") ?: 1
+            val name: String = navBackStack.arguments?.getString("name") ?: " "
+            val color: String = navBackStack.arguments?.getString("color") ?: "Black"
+            CounterScreen(navController = navController, id, name, color)
+        }
     }
 }

@@ -111,7 +111,7 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
                         if(item.type==TypeScale.Counter.name){
                             navController.navigate("counter_screen/${item.id}/${item.name_scale}/${item.color}")
                         }else{
-                            navController.navigate("main_screen")
+                            navController.navigate("check_list_screen/${item.id}/${item.name_scale}/${item.color}")
                         }
                     },onLongClick = {
                         changingScale.value = item.copy()
@@ -268,9 +268,7 @@ fun GreetingPreview() {
 }
 
 
-enum class DoneCheckList(val done: Boolean){
-    NotDone(false), Done(true);
-}
+
 
 enum class TypeScale{
     Counter, CheckList

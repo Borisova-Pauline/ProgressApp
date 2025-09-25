@@ -47,4 +47,8 @@ interface Dao {
     suspend fun changeTextCheckList(id: Int, text: String)
     @Query("delete from check_list where id=:id")
     suspend fun deleteCheckList(id: Int)
+    @Query("select count(*) from check_list where id_scale=:id_scale and done=1")
+    suspend fun howMuchChecked(id_scale: Int): Int
+    @Query("select count(*) from check_list where id_scale=:id_scale")
+    suspend fun howMuchInCheckList(id_scale: Int): Int
 }

@@ -67,5 +67,12 @@ fun ComposeNavigation() {
             val color: String = navBackStack.arguments?.getString("color") ?: "Black"
             CounterScreen(navController = navController, id, name, color)
         }
+        composable("check_list_screen/{id}/{name}/{color}", arguments = listOf(navArgument("id") {type = NavType.IntType},
+            navArgument("name") {type = NavType.StringType}, navArgument("color"){type=NavType.StringType})){
+                navBackStack ->  val id: Int = navBackStack.arguments?.getInt("id") ?: 1
+            val name: String = navBackStack.arguments?.getString("name") ?: " "
+            val color: String = navBackStack.arguments?.getString("color") ?: "Black"
+            CheckListScreen(navController = navController, id, name, color)
+        }
     }
 }

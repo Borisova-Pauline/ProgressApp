@@ -1,5 +1,6 @@
 package com.tomli.progressapp.databases
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
@@ -9,6 +10,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tomli.progressapp.Applic
 import com.tomli.progressapp.TypeScale
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
@@ -76,6 +79,16 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
     fun deleteCheckList(id: Int)=viewModelScope.launch {
         database.dao.deleteCheckList(id)
     }
+    //var checked = 0 //пункты с галочкой в чек листе
+    //var allCheckLists=1 //все пункты чек листа
+    var _progress = MutableStateFlow(0.0f)
+    var progress: StateFlow<Float> = _progress
+    fun howMuchChecked(id_scale: Int)=viewModelScope.launch {
+        val checked = database.dao.howMuchChecked(id_scale)
+        val allCheckLists = database.dao.howMuchInCheckList(id_scale)
+        _progress.value=checked.toFloat()/allCheckLists.toFloat()
+    }
+
 
 
     companion object{

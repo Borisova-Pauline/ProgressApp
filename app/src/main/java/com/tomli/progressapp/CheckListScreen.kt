@@ -1,8 +1,11 @@
 package com.tomli.progressapp
 
+import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,6 +26,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
@@ -33,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +59,7 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
     progressViewModel.howMuchChecked(id)
     val isCheckCreate = remember { mutableStateOf(false) }
     val isCheckChange = remember { mutableStateOf(false) }
-    var changingCheck = CheckList(0, id, 0, "")
+    var changingCheck = remember { mutableStateOf(CheckList(0, id, 0, "Текст пункта")) }
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
         Row(modifier = Modifier.fillMaxWidth().background(Color(ColorsData.valueOf(color_scale.value).hex)).height(60.dp)){
             if(isLightColor(color_scale.value)){
@@ -88,7 +93,6 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
                 Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
                     .clickable{
                         isCheckCreate.value=true
-                        //progressViewModel.addNewCheckList(id, "text")
                     })
             }
         }
@@ -106,7 +110,7 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
                         progressViewModel.howMuchChecked(id)
                                                                         }, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black))
                     Text(text=item.text!!, modifier = Modifier.align(Alignment.CenterVertically).clickable{
-                        changingCheck = item.copy()
+                        changingCheck.value = item.copy()
                         isCheckChange.value=true
                     })
                 }
@@ -119,7 +123,7 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
             CheckListDialog(CheckList(0, id, 0, ""), false, {isCheckCreate.value=false})
         }
         if(isCheckChange.value){
-            CheckListDialog(changingCheck, true, {isCheckChange.value=false})
+            CheckListDialog(changingCheck.value, true, {isCheckChange.value=false})
         }
     }
 }
@@ -145,12 +149,42 @@ fun changeCheckInt(check: Boolean): Int{
 
 @Composable
 fun CheckListDialog(checkList: CheckList, isChange: Boolean, onDismiss:()-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
+    var text = remember { mutableStateOf(TextFieldValue(checkList.text!!)) }
     Dialog(onDismiss) {
         Card(modifier = Modifier.width(400.dp).height(300.dp).padding(16.dp), shape = RoundedCornerShape(5.dp)){
             if(!isChange){
                 Text(text="Добавление пункта", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
             }else{
                 Text(text="Редактирование пункта", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
+            }
+            Box(modifier = Modifier.fillMaxWidth().height(150.dp).padding(10.dp)){
+                OutlinedTextField(value = text.value, onValueChange = {newText -> text.value = newText}, modifier = Modifier)
+            }
+            Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
+                Card(modifier = Modifier.weight(1f).padding(5.dp)
+                    .clickable { onDismiss() }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
+                ){
+                    Text(text="Отменить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                }
+                if(isChange){
+                    Card(modifier = Modifier.weight(1f).padding(5.dp)
+                        .clickable {
+                            progressViewModel.changeTextCheckList(checkList.id!!, text.value.text)
+                            onDismiss()
+                        }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
+                    ){
+                        Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                    }
+                }else{
+                    Card(modifier = Modifier.weight(1f).padding(5.dp)
+                        .clickable {
+                            progressViewModel.addNewCheckList(checkList.id_scale!!, text.value.text)
+                            onDismiss()
+                        }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
+                    ){
+                        Text(text="Добавить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                    }
+                }
             }
         }
     }

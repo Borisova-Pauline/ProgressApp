@@ -95,28 +95,21 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
         _progress.value=checked.toFloat()/allCheckLists.toFloat()
     }
 
-    fun howMuchCheckedShow(id_scale: Int, onReturn:(ret: StateFlow<Float>)-> Unit)=viewModelScope.launch {
+
+    fun howMuchCheckedShow(id_scale: Int, type: String, onReturn:(ret: StateFlow<Float>)-> Unit)=viewModelScope.launch {
         var _prog = MutableStateFlow(0.0f)
         var prog: StateFlow<Float> = _prog
-        val checked = database.dao.howMuchChecked(id_scale)
-        val allCheckLists = database.dao.howMuchInCheckList(id_scale)
-        _prog.value=checked.toFloat()/allCheckLists.toFloat()
+        if(type==TypeScale.CheckList.name){
+            val checked = database.dao.howMuchChecked(id_scale)
+            val allCheckLists = database.dao.howMuchInCheckList(id_scale)
+            _prog.value=checked.toFloat()/allCheckLists.toFloat()
+        }else{
+            val current = database.dao.getCountIntCurrent(id_scale)
+            val max = database.dao.getCountIntMax(id_scale)
+            _prog.value=current.toFloat()/max.toFloat()
+        }
         onReturn(prog)
     }
-
-    /*fun progressCheckListShow(id_scale: Int, onReturn:(ret: Float)->Unit)=viewModelScope.launch{
-        val a: Float = database.dao.progressCheckList(id_scale)
-        onReturn(a)
-    }*/
-
-    fun progressCounterShow(id_scale: Int, onReturn:(ret: Float)->Unit)=viewModelScope.launch {
-        onReturn(progressCounterShowFlow(id_scale))
-    }
-    suspend fun progressCounterShowFlow(id_scale: Int): Float {
-        return (database.dao.getCountFlow("current_count", id_scale).last().toFloat()/
-                database.dao.getCountFlow("max_count", id_scale).last().toFloat())
-    }
-
 
 
 

@@ -56,4 +56,6 @@ interface Dao {
     suspend fun getCountIntCurrent(id_scale: Int): Int
     @Query("select max_count from counter where id_scale=:id_scale")
     suspend fun getCountIntMax(id_scale: Int): Int
+    @Query("select * from scales where id_theme=:id_theme")
+    suspend fun allScalesOneThemeForProgress(id_theme: Int?): List<Scales>
 }

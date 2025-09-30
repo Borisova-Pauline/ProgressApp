@@ -1,6 +1,8 @@
 package com.tomli.progressapp.databases
 
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -108,6 +110,31 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
             val max = database.dao.getCountIntMax(id_scale)
             _prog.value=current.toFloat()/max.toFloat()
         }
+        onReturn(prog)
+    }
+
+
+    fun progressTheme(id_theme: Int, onReturn:(ret: StateFlow<Float>)-> Unit)=viewModelScope.launch {
+        var _prog = MutableStateFlow(0.0f)
+        var prog: StateFlow<Float> = _prog
+        var _sumProg = MutableStateFlow(0.0f)
+        var _sumAll = MutableStateFlow(0.0f)
+        val scales = database.dao.allScalesOneThemeForProgress(id_theme)
+        for(scale in scales){
+            var temple: Float
+            if(scale.type==TypeScale.CheckList.name){
+                val checked = database.dao.howMuchChecked(scale.id!!)
+                val allCheckLists = database.dao.howMuchInCheckList(scale.id!!)
+                temple=checked.toFloat()/allCheckLists.toFloat()
+            }else{
+                val current = database.dao.getCountIntCurrent(scale.id!!)
+                val max = database.dao.getCountIntMax(scale.id!!)
+                temple=current.toFloat()/max.toFloat()
+            }
+            _sumProg.value+=temple
+            _sumAll.value++
+        }
+        _prog.value=_sumProg.value/_sumAll.value
         onReturn(prog)
     }
 

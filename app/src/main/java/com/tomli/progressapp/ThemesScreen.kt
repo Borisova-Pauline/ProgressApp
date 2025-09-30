@@ -80,7 +80,13 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                         isChange.value=true
                         changingTheme.value=item.copy()
                     })){
-                    Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(80.dp)) //item.color?.toInt(16)!!)
+                    Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(80.dp)){
+                        var progress = remember { mutableStateOf(0.0f) }
+                        progressViewModel.progressTheme(item.id!!, {ret-> progress.value=ret.value})
+                        Box(modifier = Modifier.align(Alignment.Center)){
+                            Text(text="${(progress.value*100).toInt()}%", color=Color.White)
+                        }
+                    }
                     Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }

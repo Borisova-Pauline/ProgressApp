@@ -47,8 +47,17 @@ interface Dao {
     suspend fun changeTextCheckList(id: Int, text: String)
     @Query("delete from check_list where id=:id")
     suspend fun deleteCheckList(id: Int)
+
     @Query("select count(*) from check_list where id_scale=:id_scale and done=1")
     suspend fun howMuchChecked(id_scale: Int): Int
     @Query("select count(*) from check_list where id_scale=:id_scale")
     suspend fun howMuchInCheckList(id_scale: Int): Int
+    @Query("select (select count(*) from check_list where id_scale=:id_scale and done=1)/(select count(*) from check_list where id_scale=:id_scale)")
+    suspend fun progressCheckList(id_scale: Int): Float
+    @Query("select (select current_count from counter where id_scale=:id_scale)/(select max_count from counter where id_scale=:id_scale)")
+    suspend fun progressCounter(id_scale: Int): Float
+    @Query("select :count from counter where id_scale=:id_scale")
+    suspend fun getCount(count: String, id_scale: Int): Int
+    @Query("select :count from counter where id_scale=:id_scale")
+    fun getCountFlow(count: String, id_scale: Int): Flow<Int>
 }

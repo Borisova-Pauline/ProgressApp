@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -150,41 +151,64 @@ fun changeCheckInt(check: Boolean): Int{
 @Composable
 fun CheckListDialog(checkList: CheckList, isChange: Boolean, onDismiss:()-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
     var text = remember { mutableStateOf(TextFieldValue(checkList.text!!)) }
+    var isDelete = remember { mutableStateOf(false) }
+    var heightCard: Int
+    if(isChange){
+        heightCard=350
+    } else{
+        heightCard=300
+    }
     Dialog(onDismiss) {
-        Card(modifier = Modifier.width(400.dp).height(300.dp).padding(16.dp), shape = RoundedCornerShape(5.dp)){
+        Card(modifier = Modifier.width(400.dp).height(heightCard.dp).padding(16.dp), shape = RoundedCornerShape(5.dp)){
             if(!isChange){
                 Text(text="Добавление пункта", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
             }else{
                 Text(text="Редактирование пункта", modifier = Modifier.align(Alignment.CenterHorizontally).padding(4.dp), fontSize = 20.sp)
             }
-            Box(modifier = Modifier.fillMaxWidth().height(150.dp).padding(10.dp)){
-                OutlinedTextField(value = text.value, onValueChange = {newText -> text.value = newText}, modifier = Modifier)
+            Box(modifier = Modifier.fillMaxWidth().padding(10.dp)){
+                OutlinedTextField(value = text.value, onValueChange = {newText -> text.value = newText}, modifier = Modifier.height(150.dp))
             }
-            Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
-                Card(modifier = Modifier.weight(1f).padding(5.dp)
-                    .clickable { onDismiss() }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
-                ){
-                    Text(text="Отменить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+            Column {
+                Row(modifier = Modifier.height(70.dp).fillMaxWidth()){
+                    Card(modifier = Modifier.weight(1f).padding(5.dp)
+                        .clickable { onDismiss() }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
+                    ){
+                        Text(text="Отменить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                    }
+                    if(isChange){
+                        Card(modifier = Modifier.weight(1f).padding(5.dp)
+                            .clickable {
+                                progressViewModel.changeTextCheckList(checkList.id!!, text.value.text)
+                                onDismiss()
+                            }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
+                        ){
+                            Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                        }
+                    }else{
+                        Card(modifier = Modifier.weight(1f).padding(5.dp)
+                            .clickable {
+                                progressViewModel.addNewCheckList(checkList.id_scale!!, text.value.text)
+                                onDismiss()
+                            }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
+                        ){
+                            Text(text="Добавить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                        }
+                    }
                 }
                 if(isChange){
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
-                        .clickable {
-                            progressViewModel.changeTextCheckList(checkList.id!!, text.value.text)
-                            onDismiss()
-                        }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
-                    ){
-                        Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
-                    }
-                }else{
-                    Card(modifier = Modifier.weight(1f).padding(5.dp)
-                        .clickable {
-                            progressViewModel.addNewCheckList(checkList.id_scale!!, text.value.text)
-                            onDismiss()
-                        }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
-                    ){
-                        Text(text="Добавить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
+                        .clickable { isDelete.value=true }.align(Alignment.CenterHorizontally).fillMaxWidth(), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
+                        Text(text="Удалить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
                     }
                 }
+            }
+            if(isDelete.value){
+                AlertDialog(onDismissRequest = {isDelete.value=false},
+                    title = {Text(text="Удалить пункт?")},
+                    confirmButton = {Text(text = "Удалить", modifier = Modifier.padding(5.dp)
+                        .clickable { progressViewModel.deleteCheckList(checkList.id!!); isDelete.value=false; onDismiss()})},
+                    dismissButton = {Text(text = "Отменить", modifier = Modifier.padding(5.dp)
+                        .clickable { isDelete.value=false})})
             }
         }
     }

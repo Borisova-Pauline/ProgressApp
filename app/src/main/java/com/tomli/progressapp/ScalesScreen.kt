@@ -30,9 +30,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,8 @@ import com.tomli.progressapp.databases.ProgressViewModel
 import com.tomli.progressapp.databases.Scales
 import com.tomli.progressapp.databases.Themes
 import com.tomli.progressapp.ui.theme.ProgressAppTheme
+import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.toList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -117,7 +121,28 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
                         changingScale.value = item.copy()
                         isChange.value=true
                     })){
-                    Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(50.dp))
+                    if(item.type==TypeScale.CheckList.name){
+                        ProgressCheckList(item.id!!, item.color!!)
+                        /*var progress = remember { mutableStateOf(0.1f) }
+                        progressViewModel.progressCheckListShow(item.id!!, {ret ->  progress.value=ret})
+                        Box(modifier = Modifier.fillMaxWidth().height(50.dp)){
+                            LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(item.color!!).hex), modifier = Modifier.fillMaxWidth().height(50.dp))
+                            Box(modifier = Modifier.align(Alignment.Center)){
+                                Text(text="${(progress.value*100).toInt()}%", color = Color.Gray)
+                            }
+                        }*/
+                    }else{
+                        ProgressCounter(item.id!!, item.color!!)
+                        /*progressViewModel.progressCounterShow(item.id!!)
+                        var progressC: Float = progressViewModel.progressCounter
+                        Box(modifier = Modifier.fillMaxWidth().height(50.dp)){
+                            LinearProgressIndicator(progress = (progressC), color = Color(ColorsData.valueOf(item.color!!).hex), modifier = Modifier.fillMaxWidth().height(50.dp))
+                            Box(modifier = Modifier.align(Alignment.Center)){
+                                Text(text="${(progressC*100).toInt()}%", color = Color.Gray)
+                            }
+                        }*/
+                        //Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(50.dp))
+                    }
                     Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally))
                 }
             }
@@ -253,6 +278,40 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                     dismissButton = {Text(text = "Отменить", modifier = Modifier.padding(5.dp)
                         .clickable { isDelete.value=false})})
             }
+        }
+    }
+}
+
+
+
+@Composable
+fun ProgressCounter(id_scale: Int, color: String, progressViewModel: ProgressViewModel = viewModel(factory = ProgressViewModel.factory)){
+    val progress = remember { mutableStateOf(0.0f) }
+    progressViewModel.progressCounterShow(id_scale, {ret->progress.value=ret})
+    //var progressC: Float = progressViewModel.progressCounter
+    //val progress = remember { mutableStateOf(progressViewModel.progressCounter) }
+    //progressViewModel.progressCounterShow(id_scale)
+    //val progress = progressViewModel.progressCounter.collectAsState()
+
+    Box(modifier = Modifier.fillMaxWidth().height(50.dp)){
+        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color).hex), modifier = Modifier.fillMaxWidth().height(50.dp))
+        Box(modifier = Modifier.align(Alignment.Center)){
+            Text(text="${(progress.value*100).toInt()}%", color = Color.Gray)
+        }
+    }
+}
+
+
+@Composable
+fun ProgressCheckList(id_scale: Int, color: String, progressViewModel: ProgressViewModel = viewModel(factory = ProgressViewModel.factory)){
+    //var progress = 0.0f//progressViewModel.progressCheckList.collectAsState().value
+    var progress = remember { mutableStateOf(0.0f) }
+    progressViewModel.howMuchCheckedShow(id_scale, {ret-> progress.value=ret.value})
+    //val progress = progressViewModel.progress.collectAsState().value
+    Box(modifier = Modifier.fillMaxWidth().height(50.dp)){
+        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color).hex), modifier = Modifier.fillMaxWidth().height(50.dp))
+        Box(modifier = Modifier.align(Alignment.Center)){
+            Text(text="${(progress.value*100).toInt()}%", color = Color.Gray)
         }
     }
 }

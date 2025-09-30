@@ -50,6 +50,7 @@ import androidx.navigation.NavController
 import com.tomli.progressapp.databases.ProgressViewModel
 import com.tomli.progressapp.databases.Themes
 import com.tomli.progressapp.ui.theme.ProgressAppTheme
+import java.util.Base64
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -73,7 +74,8 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
             items(items = themes.value) { item ->
                 Column(modifier = Modifier
                     .padding(5.dp).combinedClickable(enabled = true, onClick = {
-                        navController.navigate("scales_screen/${item.id}/${item.name_theme}/${item.color}")
+                        val name = Base64.getEncoder().encodeToString(item.name_theme!!.toByteArray())
+                        navController.navigate("scales_screen/${item.id}/${name}/${item.color}")
                     },onLongClick = {
                         isChange.value=true
                         changingTheme.value=item.copy()

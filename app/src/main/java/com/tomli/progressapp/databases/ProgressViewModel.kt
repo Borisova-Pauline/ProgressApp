@@ -1,5 +1,6 @@
 package com.tomli.progressapp.databases
 
+import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -10,8 +11,14 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tomli.progressapp.Applic
 import com.tomli.progressapp.TypeScale
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.lastOrNull
+import kotlinx.coroutines.flow.single
+import kotlinx.coroutines.flow.singleOrNull
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
@@ -79,8 +86,7 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
     fun deleteCheckList(id: Int)=viewModelScope.launch {
         database.dao.deleteCheckList(id)
     }
-    //var checked = 0 //пункты с галочкой в чек листе
-    //var allCheckLists=1 //все пункты чек листа
+
     var _progress = MutableStateFlow(0.0f)
     var progress: StateFlow<Float> = _progress
     fun howMuchChecked(id_scale: Int)=viewModelScope.launch {
@@ -88,6 +94,29 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
         val allCheckLists = database.dao.howMuchInCheckList(id_scale)
         _progress.value=checked.toFloat()/allCheckLists.toFloat()
     }
+
+    fun howMuchCheckedShow(id_scale: Int, onReturn:(ret: StateFlow<Float>)-> Unit)=viewModelScope.launch {
+        var _prog = MutableStateFlow(0.0f)
+        var prog: StateFlow<Float> = _prog
+        val checked = database.dao.howMuchChecked(id_scale)
+        val allCheckLists = database.dao.howMuchInCheckList(id_scale)
+        _prog.value=checked.toFloat()/allCheckLists.toFloat()
+        onReturn(prog)
+    }
+
+    /*fun progressCheckListShow(id_scale: Int, onReturn:(ret: Float)->Unit)=viewModelScope.launch{
+        val a: Float = database.dao.progressCheckList(id_scale)
+        onReturn(a)
+    }*/
+
+    fun progressCounterShow(id_scale: Int, onReturn:(ret: Float)->Unit)=viewModelScope.launch {
+        onReturn(progressCounterShowFlow(id_scale))
+    }
+    suspend fun progressCounterShowFlow(id_scale: Int): Float {
+        return (database.dao.getCountFlow("current_count", id_scale).last().toFloat()/
+                database.dao.getCountFlow("max_count", id_scale).last().toFloat())
+    }
+
 
 
 

@@ -37,9 +37,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,11 +88,11 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                         isChange.value=true
                         changingTheme.value=item.copy()
                     })){
-                    Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex)).fillMaxWidth().height(80.dp)){
+                    Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex), shape = RoundedCornerShape(9.dp)).fillMaxWidth().height(80.dp)){
                         var progress = remember { mutableStateOf(0.0f) }
                         progressViewModel.progressTheme(item.id!!, {ret-> progress.value=ret.value})
                         Box(modifier = Modifier.align(Alignment.Center)){
-                            Text(text="${(progress.value*100).toInt()}%", color=Color.White)
+                            OutlinedText("${(progress.value*100).toInt()}%", item.color, 24)
                         }
                     }
                     Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally))
@@ -185,11 +193,28 @@ fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, isChangeI
 }
 
 
+@Composable
+fun OutlinedText(text: String, color: String, textSize: Int){
+    Text(text=text, style= TextStyle.Default.copy(color=Color(ColorsData.valueOf(color).darkHex), fontSize = textSize.sp,
+        drawStyle = Stroke(miter = 10f, width = 18f, join = StrokeJoin.Round))
+    )
+    Text(text=text, color = Color.White,
+        style= TextStyle.Default.copy(color=Color(ColorsData.valueOf(color).darkHex), fontSize = textSize.sp)
+    )
+}
 
 
-enum class ColorsData(val hex: Long){
-    Red(0xffff0000), Orange(0xffff8000), Yellow(0xFFffe500),
-    Green(0xff23c905), Cyan(0xff00d0ff), Blue(0xff004cff),
-    Purple(0xff9400ff), Pink(0xffff00a1), Brown(0xff77492b),
-    Black(0xff000000), Grey(0xff6e6e6e);
+
+enum class ColorsData(val hex: Long, val lightHex: Long, val darkHex: Long){
+    Red(0xffff0000, 0xffffdddd, 0xff540000),
+    Orange(0xffff8000, 0xffffe9d4, 0xff5a2a00),
+    Yellow(0xFFffe500, 0xfffffae9, 0xff5b5100),
+    Green(0xff23c905, 0xffd3ffca, 0xff0b4200),
+    Cyan(0xff00d0ff, 0xffcff6ff, 0xff004452),
+    Blue(0xff004cff, 0xffd6e3ff, 0xff001543),
+    Purple(0xff9400ff, 0xfff0ddff, 0xff28004c),
+    Pink(0xffff00a1, 0xffffd3ee, 0xff510030),
+    Brown(0xff77492b, 0xffdaccc3, 0xff432009),
+    Black(0xff000000, 0xffc8c8c8, 0xff000000),
+    Grey(0xff6e6e6e, 0xffe4e4e4, 0xff191919);
 }

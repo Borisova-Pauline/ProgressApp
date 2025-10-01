@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -272,9 +273,9 @@ fun ProgressScale(id_scale: Int, color: String, type: String, progressViewModel:
     var progress = remember { mutableStateOf(0.0f) }
     progressViewModel.howMuchCheckedShow(id_scale, type, {ret-> progress.value=ret.value})
     Box(modifier = Modifier.fillMaxWidth().height(50.dp)){
-        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color).hex), modifier = Modifier.fillMaxWidth().height(50.dp))
+        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color).hex), trackColor = Color(ColorsData.valueOf(color).lightHex), modifier = Modifier.fillMaxWidth().height(50.dp)/*.border(1.dp, color = Color(ColorsData.valueOf(color).darkHex))*/)
         Box(modifier = Modifier.align(Alignment.Center)){
-            Text(text="${(progress.value*100).toInt()}%", color = Color.Gray)
+            OutlinedText("${(progress.value*100).toInt()}%", color, 19)
         }
     }
 }

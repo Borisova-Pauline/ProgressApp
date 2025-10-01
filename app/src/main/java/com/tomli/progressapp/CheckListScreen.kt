@@ -98,7 +98,7 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
             }
         }
         val progress = progressViewModel.progress.collectAsState()
-        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color_scale.value).hex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
+        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
         Text(text = "${(progress.value*100).toInt()}%", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = check_list.value) { item ->

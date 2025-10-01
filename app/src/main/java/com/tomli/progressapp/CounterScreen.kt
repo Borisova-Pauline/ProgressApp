@@ -93,9 +93,9 @@ fun CounterScreen(navController: NavController, id: Int, name: String, color: St
             items(items = counter.value) { item ->
                 Column(modifier = Modifier
                     .padding(15.dp).fillMaxWidth()){
-                    LinearProgressIndicator(progress = (item.current_count!!.toFloat()/item.max_count!!.toFloat()), color = Color(ColorsData.valueOf(color_scale.value).hex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
+                    LinearProgressIndicator(progress = (item.current_count!!.toFloat()/item.max_count!!.toFloat()), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
 
-                    Row(modifier = Modifier.align(Alignment.CenterHorizontally)){
+                    Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 20.dp)){
                         Text(text = "  -  ", fontSize = 35.sp, modifier = Modifier.clickable {
                             if(item.current_count!!>0){
                                 progressViewModel.updateCurrentCount(item.id!!, item.current_count-1)

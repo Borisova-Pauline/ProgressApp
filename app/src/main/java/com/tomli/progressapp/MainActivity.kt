@@ -57,10 +57,9 @@ fun ComposeNavigation() {
         composable("scales_screen/{id}/{name}/{color}", arguments = listOf(navArgument("id") {type = NavType.IntType},
             navArgument("name") {type = NavType.StringType}, navArgument("color"){type=NavType.StringType})){
                 navBackStack ->  val id: Int = navBackStack.arguments?.getInt("id") ?: 1
-            val nameEncoded: String = navBackStack.arguments?.getString("name") ?: " "
+            val name: String = navBackStack.arguments?.getString("name") ?: " "
             val color: String = navBackStack.arguments?.getString("color") ?: "Black"
-            val name = Base64.getDecoder().decode(nameEncoded)
-            ScalesScreen(navController = navController, id, String(name), color)
+            ScalesScreen(navController = navController, id, name, color)
         }
         composable("counter_screen/{id}/{name}/{color}", arguments = listOf(navArgument("id") {type = NavType.IntType},
             navArgument("name") {type = NavType.StringType}, navArgument("color"){type=NavType.StringType})){

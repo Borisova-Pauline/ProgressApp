@@ -125,7 +125,7 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
 
                     ProgressScale(item.id!!, item.color!!, item.type!!)
 
-                    Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally))
+                    Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally),textAlign = TextAlign.Center)
                 }
             }
         }

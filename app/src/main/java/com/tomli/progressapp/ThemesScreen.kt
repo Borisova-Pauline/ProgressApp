@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,17 +25,27 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -44,11 +55,14 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,6 +72,7 @@ import androidx.navigation.NavController
 import com.tomli.progressapp.databases.ProgressViewModel
 import com.tomli.progressapp.databases.Themes
 import com.tomli.progressapp.ui.theme.ProgressAppTheme
+import kotlinx.coroutines.launch
 import java.util.Base64
 
 
@@ -70,41 +85,132 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
     val isCreate = remember{ mutableStateOf(false)}
     val isChange=remember{ mutableStateOf(false)}
     val changingTheme = remember { mutableStateOf(Themes(0, "name", "color")) }
-    Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
-        Box(modifier = Modifier.fillMaxWidth().background(Color.Black)){
-            Image(painter = painterResource(R.drawable.button_more), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterStart))
-            Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterEnd)
-                .clickable{
-                    isCreate.value=true
-                })
-        }
-        LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){
-            items(items = themes.value) { item ->
-                Column(modifier = Modifier
-                    .padding(5.dp).combinedClickable(enabled = true, onClick = {
-                        val name = Base64.getEncoder().encodeToString(item.name_theme!!.toByteArray())
-                        navController.navigate("scales_screen/${item.id}/${name}/${item.color}")
-                    },onLongClick = {
-                        isChange.value=true
-                        changingTheme.value=item.copy()
-                    })){
-                    Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex), shape = RoundedCornerShape(9.dp)).fillMaxWidth().height(80.dp)){
-                        var progress = remember { mutableStateOf(0.0f) }
-                        progressViewModel.progressTheme(item.id!!, {ret-> progress.value=ret.value})
-                        Box(modifier = Modifier.align(Alignment.Center)){
-                            OutlinedText("${(progress.value*100).toInt()}%", item.color, 24)
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
+    val appName = stringResource(id=R.string.app_name)
+    ModalNavigationDrawer(
+        drawerContent = {
+            ModalDrawerSheet(drawerContainerColor = Color.White) {
+                Column(modifier =Modifier.padding(horizontal = 10.dp).verticalScroll(rememberScrollState())){
+                    Row(modifier = Modifier.height(70.dp).padding(vertical = 12.dp)){
+                        Image(painter = painterResource(R.mipmap.progress_icon), contentDescription = null,
+                            modifier = Modifier.padding(5.dp))
+                        Box(modifier = Modifier.weight(1f).align(Alignment.CenterVertically)){
+                            Text(text=appName, fontSize = 22.sp, modifier = Modifier.padding(7.dp))
                         }
                     }
-                    Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally))
+                    HorizontalDivider()
+                    NavigationDrawerItem(
+                        label = {
+                            Row{
+                                Image(painter = painterResource(R.drawable.button_add_black), contentDescription = null,
+                                    modifier = Modifier.padding(5.dp).size(25.dp))
+                                Box(modifier = Modifier.weight(1f).padding(horizontal = 5.dp).align(Alignment.CenterVertically)){
+                                    Text("Новая тема", fontSize = 20.sp, color=Color.Black)
+                                }
+                            }
+                        },
+                        selected = false,
+                        onClick = {scope.launch { drawerState.close()}; isCreate.value=true},
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.White
+                        )
+                    )
+                    HorizontalDivider()
+                    NavigationDrawerItem(
+                        label = {
+                            Row{
+                                Image(painter = painterResource(R.drawable.button_instruction), contentDescription = null,
+                                    modifier = Modifier.padding(5.dp).size(25.dp))
+                                Box(modifier = Modifier.weight(1f).padding(horizontal = 5.dp).align(Alignment.CenterVertically)){
+                                    Text("Краткая инструкция", fontSize = 20.sp, color=Color.Black)
+                                }
+                            }
+                        },
+                        selected = false,
+                        onClick = {},
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.White
+                        )
+                    )
+                    NavigationDrawerItem(
+                        label = {
+                            Row{
+                                Image(painter = painterResource(R.drawable.button_about), contentDescription = null,
+                                    modifier = Modifier.padding(5.dp).size(25.dp))
+                                Box(modifier = Modifier.weight(1f).padding(horizontal = 5.dp).align(Alignment.CenterVertically)){
+                                    Text("О приложении", fontSize = 20.sp, color=Color.Black)
+                                }
+                            }
+                        },
+                        selected = false,
+                        onClick = {},
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.White
+                        )
+                    )
+                    NavigationDrawerItem(
+                        label = {
+                            Row{
+                                Image(painter = painterResource(R.drawable.button_share), contentDescription = null,
+                                    modifier = Modifier.padding(5.dp).size(25.dp))
+                                Box(modifier = Modifier.weight(1f).padding(horizontal = 5.dp).align(Alignment.CenterVertically)){
+                                    Text("Поделиться", fontSize = 20.sp, color=Color.Black)
+                                }
+                            }
+                        },
+                        selected = false,
+                        onClick = {},
+                        colors = NavigationDrawerItemDefaults.colors(
+                            unselectedContainerColor = Color.White
+                        )
+                    )
+                }
+            }
+        }, drawerState=drawerState
+    ) {
+        Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
+            Box(modifier = Modifier.fillMaxWidth().background(Color.Black)){
+                Image(painter = painterResource(R.drawable.button_more), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterStart)
+                    .clickable { scope.launch {
+                        if(drawerState.isClosed){
+                            drawerState.open()
+                        }else{
+                            drawerState.close()
+                        }
+                    } })
+                Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterEnd)
+                    .clickable{
+                        isCreate.value=true
+                    })
+            }
+            LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){
+                items(items = themes.value) { item ->
+                    Column(modifier = Modifier
+                        .padding(5.dp).combinedClickable(enabled = true, onClick = {
+                            navController.navigate("scales_screen/${item.id}/${item.name_theme}/${item.color}")
+                        },onLongClick = {
+                            isChange.value=true
+                            changingTheme.value=item.copy()
+                        })){
+                        Box(modifier = Modifier.background(Color(ColorsData.valueOf(item.color!!).hex), shape = RoundedCornerShape(9.dp)).fillMaxWidth().height(80.dp)){
+                            var progress = remember { mutableStateOf(0.0f) }
+                            progressViewModel.progressTheme(item.id!!, {ret-> progress.value=ret.value})
+                            Box(modifier = Modifier.align(Alignment.Center)){
+                                OutlinedText("${(progress.value*100).toInt()}%", item.color, 24)
+                            }
+                        }
+                        Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center)
+                    }
                 }
             }
         }
-        if(isCreate.value){
-            ThemeDialog(Themes(0, "Новая тема", "Red"), false, {isCreate.value=false}, false, { _, _ ->  })
-        }
-        if(isChange.value){
-            ThemeDialog(changingTheme.value, true, {isChange.value=false}, false, {_, _ ->  })
-        }
+    }
+    if(isCreate.value){
+        ThemeDialog(Themes(0, "Новая тема", "Red"), false, {isCreate.value=false}, false, { _, _ ->  })
+    }
+    if(isChange.value){
+        ThemeDialog(changingTheme.value, true, {isChange.value=false}, false, {_, _ ->  })
     }
 }
 

@@ -1,5 +1,7 @@
 package com.tomli.progressapp
 
+import android.content.Context
+import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -87,7 +89,8 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
     val changingTheme = remember { mutableStateOf(Themes(0, "name", "color")) }
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val appName = stringResource(id=R.string.app_name)
+    val appName = stringResource(id=R.string.app_name_rus)
+    val context = LocalContext.current
     ModalNavigationDrawer(
         drawerContent = {
             ModalDrawerSheet(drawerContainerColor = Color.White) {
@@ -160,7 +163,7 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                             }
                         },
                         selected = false,
-                        onClick = {},
+                        onClick = { shareApp(context, "Скачивание приложения ProgressApp пока недоступно\nGitHub репозиторий: https://github.com/Borisova-Pauline/ProgressApp", "Скачивание приложения ProgressApp")},
                         colors = NavigationDrawerItemDefaults.colors(
                             unselectedContainerColor = Color.White
                         )
@@ -307,6 +310,18 @@ fun OutlinedText(text: String, color: String, textSize: Int){
     Text(text=text, color = Color.White,
         style= TextStyle.Default.copy(color=Color(ColorsData.valueOf(color).darkHex), fontSize = textSize.sp)
     )
+}
+
+
+fun shareApp(context: Context, link: String, title: String){
+    val sendIntend: Intent = Intent().apply{
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, link)
+        putExtra(Intent.EXTRA_SUBJECT, title)
+        type="text/plain"
+    }
+    val shareIntent=Intent.createChooser(sendIntend, "Поделиться с помощью")
+    context.startActivity(shareIntent)
 }
 
 

@@ -1,26 +1,15 @@
 package com.tomli.progressapp.databases
 
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
-import androidx.lifecycle.viewmodel.viewModelFactory
 import com.tomli.progressapp.Applic
 import com.tomli.progressapp.TypeScale
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.lastOrNull
-import kotlinx.coroutines.flow.single
-import kotlinx.coroutines.flow.singleOrNull
-import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.launch
 
 class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
@@ -126,6 +115,9 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
                 val checked = database.dao.howMuchChecked(scale.id!!)
                 val allCheckLists = database.dao.howMuchInCheckList(scale.id!!)
                 temple=checked.toFloat()/allCheckLists.toFloat()
+                if(temple.isNaN()){
+                    temple=0.0f
+                }
             }else{
                 val current = database.dao.getCountIntCurrent(scale.id!!)
                 val max = database.dao.getCountIntMax(scale.id!!)

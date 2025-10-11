@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Отслеживание прогресса</string>
+    <string name="app_name_rus">Отслеживание прогресса</string>
+    <string name="app_name">ProgressApp</string>
 </resources>

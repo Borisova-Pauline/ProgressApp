@@ -47,6 +47,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -78,8 +79,9 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
                 Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
 
-                Text(text = name_theme.value, color = Color.Black,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_theme.value, color = Color.Black, lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
                 Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
                     .clickable{
@@ -94,8 +96,9 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
                 Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
 
-                Text(text = name_theme.value, color = Color.White,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_theme.value, color = Color.White, lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
                 Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
                     .clickable{
@@ -108,6 +111,13 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
                     })
             }
 
+        }
+        if(scales.value.isEmpty()){
+            Box(modifier = Modifier.weight(1f).padding(20.dp)){
+                Text(text="Тема пустая\nНажмите на +, чтобы добавить новую шкалу",
+                    fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Gray,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.Center))
+            }
         }
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = scales.value) { item ->
@@ -125,7 +135,8 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
 
                     ProgressScale(item.id!!, item.color!!, item.type!!)
 
-                    Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally),textAlign = TextAlign.Center)
+                    Text(text = "${item.name_scale}", modifier = Modifier.align(Alignment.CenterHorizontally),
+                        textAlign = TextAlign.Center)
                 }
             }
         }
@@ -181,7 +192,13 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                         Box(modifier = Modifier.background(Color(item.hex)).size(30.dp)
                             .clickable { colorIndex.value= item.ordinal}){
                             if(colorIndex.value==item.ordinal){
-                                Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.align(
+                                val buttonImage: Int
+                                if(isLightColor(item.name)){
+                                    buttonImage=R.drawable.button_add_black
+                                }else{
+                                    buttonImage=R.drawable.button_add
+                                }
+                                Image(painter = painterResource(buttonImage), contentDescription = "", modifier = Modifier.align(
                                     Alignment.Center).padding(5.dp))
                             }
                         }

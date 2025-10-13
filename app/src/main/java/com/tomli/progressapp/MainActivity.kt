@@ -75,5 +75,11 @@ fun ComposeNavigation() {
             val color: String = navBackStack.arguments?.getString("color") ?: "Black"
             CheckListScreen(navController = navController, id, name, color)
         }
+        composable("instruction_screen"){
+            ShortInstructionScreen(navController)
+        }
+        composable("about_screen"){
+            AboutScreen(navController)
+        }
     }
 }

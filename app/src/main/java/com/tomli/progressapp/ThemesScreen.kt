@@ -65,6 +65,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -131,7 +132,7 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                             }
                         },
                         selected = false,
-                        onClick = {},
+                        onClick = {navController.navigate("instruction_screen")},
                         colors = NavigationDrawerItemDefaults.colors(
                             unselectedContainerColor = Color.White
                         )
@@ -147,7 +148,7 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                             }
                         },
                         selected = false,
-                        onClick = {},
+                        onClick = {navController.navigate("about_screen")},
                         colors = NavigationDrawerItemDefaults.colors(
                             unselectedContainerColor = Color.White
                         )
@@ -182,10 +183,20 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                             drawerState.close()
                         }
                     } })
+                Text(text = "Ваши темы", color = Color.White,
+                    modifier = Modifier.padding(10.dp).align(Alignment.Center), textAlign = TextAlign.Center, fontSize = 20.sp)
                 Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterEnd)
                     .clickable{
                         isCreate.value=true
                     })
+            }
+            if(themes.value.isEmpty()){
+                Box(modifier = Modifier.weight(1f).padding(20.dp)){
+                    Text(text="У вас пока что нет созданных тем\nНажмите на +, чтобы создать новую тему",
+                        fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Gray,
+                        modifier = Modifier.fillMaxWidth().align(Alignment.Center))
+                }
+
             }
             LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){
                 items(items = themes.value) { item ->
@@ -203,7 +214,8 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
                                 OutlinedText("${(progress.value*100).toInt()}%", item.color, 24)
                             }
                         }
-                        Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally), textAlign = TextAlign.Center)
+                        Text(text = "${item.name_theme}", modifier = Modifier.align(Alignment.CenterHorizontally),
+                            textAlign = TextAlign.Center, maxLines = 3, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -247,7 +259,13 @@ fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                         Box(modifier = Modifier.background(Color(item.hex)).size(30.dp)
                             .clickable { colorIndex.value= item.ordinal}){
                             if(colorIndex.value==item.ordinal){
-                                Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.align(
+                                val buttonImage: Int
+                                if(isLightColor(item.name)){
+                                    buttonImage=R.drawable.button_add_black
+                                }else{
+                                    buttonImage=R.drawable.button_add
+                                }
+                                Image(painter = painterResource(buttonImage), contentDescription = "", modifier = Modifier.align(
                                     Alignment.Center).padding(5.dp))
                             }
                         }

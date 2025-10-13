@@ -42,6 +42,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -68,8 +69,9 @@ fun CounterScreen(navController: NavController, id: Int, name: String, color: St
                 Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically).clickable { navController.navigateUp() })
 
-                Text(text = name_scale.value, color = Color.Black,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_scale.value, color = Color.Black,lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
                 Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
                     .clickable{
@@ -79,8 +81,9 @@ fun CounterScreen(navController: NavController, id: Int, name: String, color: St
                 Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically).clickable { navController.navigateUp() })
 
-                Text(text = name_scale.value, color = Color.White,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_scale.value, color = Color.White,lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
                 Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
                     .clickable{

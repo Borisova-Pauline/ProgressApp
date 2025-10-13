@@ -37,9 +37,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -67,8 +69,9 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
                 Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically).clickable { navController.navigateUp() })
 
-                Text(text = name_scale.value, color = Color.Black,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_scale.value, color = Color.Black,lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
                 Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically)
@@ -83,8 +86,9 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
                 Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically).clickable { navController.navigateUp() })
 
-                Text(text = name_scale.value, color = Color.White,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically), textAlign = TextAlign.Center)
+                Text(text = name_scale.value, color = Color.White,lineHeight = 18.sp,
+                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
                 Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
                     Alignment.CenterVertically)
@@ -100,6 +104,13 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
         val progress = progressViewModel.progress.collectAsState()
         LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
         Text(text = "${(progress.value*100).toInt()}%", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+        if(check_list.value.isEmpty()){
+            Box(modifier = Modifier.weight(1f).padding(20.dp)){
+                Text(text="Сейчас в чек-листе нет пунктов\nНажмите на +, чтобы добавить новый пункт",
+                    fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Gray,
+                    modifier = Modifier.fillMaxWidth().align(Alignment.Center))
+            }
+        }
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = check_list.value) { item ->
                 val isCheck = remember { mutableStateOf(!changeCheckBool(item.done!!)) }
@@ -152,6 +163,7 @@ fun changeCheckInt(check: Boolean): Int{
 fun CheckListDialog(checkList: CheckList, isChange: Boolean, onDismiss:()-> Unit, progressViewModel: ProgressViewModel= viewModel(factory = ProgressViewModel.factory)){
     var text = remember { mutableStateOf(TextFieldValue(checkList.text!!)) }
     var isDelete = remember { mutableStateOf(false) }
+    val context = LocalContext.current
     var heightCard: Int
     if(isChange){
         heightCard=350
@@ -178,8 +190,12 @@ fun CheckListDialog(checkList: CheckList, isChange: Boolean, onDismiss:()-> Unit
                     if(isChange){
                         Card(modifier = Modifier.weight(1f).padding(5.dp)
                             .clickable {
-                                progressViewModel.changeTextCheckList(checkList.id!!, text.value.text)
-                                onDismiss()
+                                if(text.value.text!=""){
+                                    progressViewModel.changeTextCheckList(checkList.id!!, text.value.text)
+                                    onDismiss()
+                                }else{
+                                    Toast.makeText(context, "Нет текста", Toast.LENGTH_LONG).show()
+                                }
                             }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
                         ){
                             Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
@@ -187,8 +203,12 @@ fun CheckListDialog(checkList: CheckList, isChange: Boolean, onDismiss:()-> Unit
                     }else{
                         Card(modifier = Modifier.weight(1f).padding(5.dp)
                             .clickable {
-                                progressViewModel.addNewCheckList(checkList.id_scale!!, text.value.text)
-                                onDismiss()
+                                if(text.value.text!=""){
+                                    progressViewModel.addNewCheckList(checkList.id_scale!!, text.value.text)
+                                    onDismiss()
+                                }else{
+                                    Toast.makeText(context, "Текст ещё не написан", Toast.LENGTH_LONG).show()
+                                }
                             }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
                         ){
                             Text(text="Добавить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
@@ -212,10 +232,4 @@ fun CheckListDialog(checkList: CheckList, isChange: Boolean, onDismiss:()-> Unit
             }
         }
     }
-}
-
-
-
-enum class DoneCheckList(val done: Boolean){
-    NotDone(false), Done(true);
 }

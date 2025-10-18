@@ -199,7 +199,7 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
 
             }
             LazyVerticalGrid(columns = GridCells.Fixed(3), modifier = Modifier.padding(horizontal = 2.dp)){
-                items(items = themes.value) { item ->
+                items(items = themes.value, key = {item -> item.id!!}) { item ->
                     Column(modifier = Modifier
                         .padding(5.dp).combinedClickable(enabled = true, onClick = {
                             navController.navigate("scales_screen/${item.id}/${item.name_theme}/${item.color}")
@@ -241,6 +241,7 @@ fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, isChangeI
         heightCard=300
     }
     val isDelete= remember { mutableStateOf(false) }
+    val context = LocalContext.current
     Dialog(onDismissRequest = onDismiss) {
         Card(modifier = Modifier.width(400.dp).height(heightCard.dp).padding(16.dp), shape = RoundedCornerShape(5.dp)){
             if(!isChange){
@@ -280,19 +281,27 @@ fun ThemeDialog(theme: Themes, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                 if(!isChange){
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
-                            progressViewModel.addNewTheme(name.value.text, ColorsData.entries.get(colorIndex.value).name)
-                            onDismiss()
+                            if(name.value.text!=""){
+                                progressViewModel.addNewTheme(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                                onDismiss()
+                            }else{
+                                Toast.makeText(context, "Название не может быть пустым", Toast.LENGTH_LONG).show()
+                            }
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
                         Text(text="Создать", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
                     }
                 }else{
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
-                            progressViewModel.changeTheme(theme.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
-                            if(isChangeInside){
-                                onReturnChanges(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            if(name.value.text!=""){
+                                progressViewModel.changeTheme(theme.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                                if(isChangeInside){
+                                    onReturnChanges(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                                }
+                                onDismiss()
+                            }else{
+                                Toast.makeText(context, "Название не может быть пустым", Toast.LENGTH_LONG).show()
                             }
-                            onDismiss()
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)){
                         Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
                     }

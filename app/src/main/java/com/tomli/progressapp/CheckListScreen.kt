@@ -112,7 +112,7 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
             }
         }
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
-            items(items = check_list.value) { item ->
+            items(items = check_list.value, key = {item -> item.id!!}) { item ->
                 val isCheck = remember { mutableStateOf(!changeCheckBool(item.done!!)) }
                 progressViewModel.howMuchChecked(id)
                 Row(modifier = Modifier.fillMaxWidth().padding(6.dp)){
@@ -120,7 +120,7 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
                         isCheck.value=changeCheckBool(item.done!!)
                         progressViewModel.changeDoneCheckList(item.id!!, changeCheckInt(!isCheck.value))
                         progressViewModel.howMuchChecked(id)
-                                                                        }, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black))
+                                                                        }, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black, checkmarkColor = Color.White))
                     Text(text=item.text!!, modifier = Modifier.align(Alignment.CenterVertically).clickable{
                         changingCheck.value = item.copy()
                         isCheckChange.value=true

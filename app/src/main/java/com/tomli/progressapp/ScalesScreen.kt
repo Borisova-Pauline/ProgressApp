@@ -1,5 +1,6 @@
 package com.tomli.progressapp
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -43,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -120,7 +122,7 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
             }
         }
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
-            items(items = scales.value) { item ->
+            items(items = scales.value, key = {item -> item.id!!}) { item ->
                 Column(modifier = Modifier
                     .padding(5.dp).fillMaxWidth().combinedClickable(enabled = true, onClick = {
                         if(item.type==TypeScale.Counter.name){
@@ -161,6 +163,7 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
     val isDelete= remember { mutableStateOf(false) }
     val isCounter = remember { mutableStateOf(false) }
     val maxCount = remember { mutableStateOf("10") }
+    val context = LocalContext.current
     if(isChange){
         if(isChangeInside){
             heightCard=300
@@ -210,11 +213,11 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                     Text(text="Тип:  ", modifier = Modifier.align(Alignment.CenterVertically))
                     Column{
                         Row{
-                            Checkbox(checked = !isCounter.value, onCheckedChange = {isCounter.value=!isCounter.value}, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black))
+                            Checkbox(checked = !isCounter.value, onCheckedChange = {isCounter.value=!isCounter.value}, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black, checkmarkColor = Color.White))
                             Text(text="Чек-лист", modifier = Modifier.align(Alignment.CenterVertically))
                         }
                         Row{
-                            Checkbox(checked = isCounter.value, onCheckedChange = {isCounter.value=!isCounter.value}, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black))
+                            Checkbox(checked = isCounter.value, onCheckedChange = {isCounter.value=!isCounter.value}, colors = CheckboxDefaults.colors(checkedColor = Color.Black, uncheckedColor = Color.Black, checkmarkColor = Color.White))
                             Text(text="Счётчик", modifier = Modifier.align(Alignment.CenterVertically))
                         }
                     }
@@ -236,12 +239,25 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                 if(!isChange){
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
-                            if(isCounter.value){
-                                progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.Counter.name, maxCount.value.toInt())
+                            if(name.value.text!=""){
+                                if(isCounter.value){
+                                    try{
+                                        if(maxCount.value.toInt()>0){
+                                            progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.Counter.name, maxCount.value.toInt())
+                                            onDismiss()
+                                        }else{
+                                            Toast.makeText(context, "Максимальное число должно быть больше нуля", Toast.LENGTH_LONG).show()
+                                        }
+                                    }catch (e: Exception){
+                                        Toast.makeText(context, "Введите максимальное количество", Toast.LENGTH_LONG).show()
+                                    }
+                                }else{
+                                    progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.CheckList.name)
+                                    onDismiss()
+                                }
                             }else{
-                                progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.CheckList.name)
+                                Toast.makeText(context, "Название не может быть пустым", Toast.LENGTH_LONG).show()
                             }
-                            onDismiss()
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
                     ){
                         Text(text="Добавить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))
@@ -249,11 +265,15 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                 }else{
                     Card(modifier = Modifier.weight(1f).padding(5.dp)
                         .clickable {
-                            progressViewModel.changeScale(scale.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
-                            if(isChangeInside){
-                                onReturnChanges(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                            if(name.value.text!=""){
+                                progressViewModel.changeScale(scale.id!!, name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                                if(isChangeInside){
+                                    onReturnChanges(name.value.text, ColorsData.entries.get(colorIndex.value).name)
+                                }
+                                onDismiss()
+                            }else{
+                                Toast.makeText(context, "Название не может быть пустым", Toast.LENGTH_LONG).show()
                             }
-                            onDismiss()
                         }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
                     ){
                         Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))

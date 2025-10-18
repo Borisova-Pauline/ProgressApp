@@ -156,19 +156,24 @@ fun CounterDialog(counter: Counter, onDismiss:()-> Unit, progressViewModel: Prog
                 }
                 Card(modifier = Modifier.weight(1f).padding(5.dp)
                     .clickable {
-                        if(newCurrentCount.value.toInt()<=newMaxCount.value.toInt() && newCurrentCount.value.toInt()>=0 && newMaxCount.value.toInt()>0){
-                            progressViewModel.updateCurrentCount(counter.id!!, newCurrentCount.value.toInt())
-                            progressViewModel.changeMaxCount(counter.id!!, newMaxCount.value.toInt())
-                            onDismiss()
-                        }else{
-                            var mistake = "Неправильные изменения"
-                            when{
-                                newCurrentCount.value.toInt()>=newMaxCount.value.toInt() -> mistake="Текущий счёт не может быть больше максимального"
-                                newMaxCount.value.toInt()<0 -> mistake="Максимальный счёт должен быть больше нуля"
-                                newCurrentCount.value.toInt()<=0 -> mistake="Текущий счёт должен быть равен или больше 0"
+                        try{
+                            if(newCurrentCount.value.toInt()<=newMaxCount.value.toInt() && newCurrentCount.value.toInt()>=0 && newMaxCount.value.toInt()>0){
+                                progressViewModel.updateCurrentCount(counter.id!!, newCurrentCount.value.toInt())
+                                progressViewModel.changeMaxCount(counter.id!!, newMaxCount.value.toInt())
+                                onDismiss()
+                            }else{
+                                var mistake = "Неправильные изменения"
+                                when{
+                                    newCurrentCount.value.toInt()>=newMaxCount.value.toInt() -> mistake="Текущий счёт не может быть больше максимального"
+                                    newMaxCount.value.toInt()<0 -> mistake="Максимальный счёт должен быть больше нуля"
+                                    newCurrentCount.value.toInt()<=0 -> mistake="Текущий счёт должен быть равен или больше 0"
+                                }
+                                Toast.makeText(context, mistake, Toast.LENGTH_LONG).show()
                             }
-                            Toast.makeText(context, mistake, Toast.LENGTH_LONG).show()
+                        }catch (e: Exception){
+                            Toast.makeText(context, "Введите числа", Toast.LENGTH_LONG).show()
                         }
+
                     }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)
                 ){
                     Text(text="Сохранить", modifier = Modifier.padding(5.dp).align(Alignment.CenterHorizontally))

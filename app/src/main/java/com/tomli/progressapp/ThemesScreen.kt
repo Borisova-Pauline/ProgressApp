@@ -192,9 +192,15 @@ fun ThemesScreen(navController: NavController, progressViewModel: ProgressViewMo
             }
             if(themes.value.isEmpty()){
                 Box(modifier = Modifier.weight(1f).padding(20.dp)){
-                    Text(text="У вас пока что нет созданных тем\nНажмите на +, чтобы создать новую тему",
-                        fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Gray,
-                        modifier = Modifier.fillMaxWidth().align(Alignment.Center))
+                    Column(modifier = Modifier.fillMaxWidth().align(Alignment.Center)){
+                        Text(text="У вас пока что нет созданных тем\nНажмите на +, чтобы создать новую тему",
+                            fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Gray,
+                            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally))
+                        Text(text = "Или можете ознакомиться с краткой инструкцией",
+                            fontSize = 20.sp, textAlign = TextAlign.Center, color = Color.Gray,
+                            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+                                .padding(top = 10.dp).clickable { navController.navigate("instruction_screen")})
+                    }
                 }
 
             }

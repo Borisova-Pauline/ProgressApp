@@ -319,15 +319,6 @@ fun ProgressScale(id_scale: Int, color: String, type: String, progressViewModel:
 
 
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    ProgressAppTheme {
-        //ThemeChangeDialog(Themes(0, "n", "Pink"),{})
-        //ScaleDialog(Scales(0, 0, "Новая шкала", "Red", TypeScale.CheckList.name), true, {})
-    }
-}
-
 
 
 

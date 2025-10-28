@@ -2,12 +2,9 @@ package com.tomli.progressapp
 
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -40,7 +37,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -52,7 +48,7 @@ import com.tomli.progressapp.databases.Counter
 import com.tomli.progressapp.databases.ProgressViewModel
 import com.tomli.progressapp.databases.Scales
 
-@OptIn(ExperimentalFoundationApi::class)
+
 @Composable
 fun CounterScreen(navController: NavController, id: Int, name: String, color: String, progressViewModel: ProgressViewModel = viewModel(factory = ProgressViewModel.factory)){
     var name_scale = remember { mutableStateOf(name) }
@@ -63,40 +59,38 @@ fun CounterScreen(navController: NavController, id: Int, name: String, color: St
     val isScaleChange = remember { mutableStateOf(false) }
     val isCounterChange = remember { mutableStateOf(false) }
     val counterChange = remember { mutableStateOf(Counter(0, 0, 0, 0)) }
+
+    var textColor: Color
+    var buttonBack: Int
+    var buttonChange: Int
+    if(isLightColor(color_scale.value)){
+        textColor = Color.Black
+        buttonBack = R.drawable.button_back_black
+        buttonChange = R.drawable.button_change_black
+    }else{
+        textColor = Color.White
+        buttonBack = R.drawable.button_back
+        buttonChange = R.drawable.button_change
+    }
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
         Row(modifier = Modifier.fillMaxWidth().background(Color(ColorsData.valueOf(color_scale.value).hex)).height(60.dp)){
-            if(isLightColor(color_scale.value)){
-                Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically).clickable { navController.navigateUp() })
+            Image(painter = painterResource(buttonBack), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
+                Alignment.CenterVertically).clickable { navController.navigateUp() })
 
-                Text(text = name_scale.value, color = Color.Black,lineHeight = 18.sp,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(text = name_scale.value, color = textColor,lineHeight = 18.sp,
+                modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
-                Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isScaleChange.value=true
-                    })
-            }else{
-                Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically).clickable { navController.navigateUp() })
-
-                Text(text = name_scale.value, color = Color.White,lineHeight = 18.sp,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
-
-                Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isScaleChange.value=true
-                    })
-            }
-
+            Image(painter = painterResource(buttonChange), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
+                .clickable{
+                    isScaleChange.value=true
+                })
         }
         LazyVerticalGrid(columns = GridCells.Fixed(1),modifier = Modifier.padding(horizontal = 2.dp)){
             items(items = counter.value) { item ->
                 Column(modifier = Modifier
                     .padding(15.dp).fillMaxWidth()){
-                    LinearProgressIndicator(progress = (item.current_count!!.toFloat()/item.max_count!!.toFloat()), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
+                    LinearProgressIndicator(progress = (item.current_count!!.toFloat()/item.max_count!!.toFloat()), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color_scale.value).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
 
                     Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(vertical = 20.dp)){
                         Text(text = "  -  ", fontSize = 35.sp, modifier = Modifier.clickable {

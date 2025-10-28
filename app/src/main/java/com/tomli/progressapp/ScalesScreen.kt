@@ -5,7 +5,6 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
@@ -21,7 +20,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -30,15 +28,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxColors
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -50,7 +45,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -59,9 +53,6 @@ import androidx.navigation.NavController
 import com.tomli.progressapp.databases.ProgressViewModel
 import com.tomli.progressapp.databases.Scales
 import com.tomli.progressapp.databases.Themes
-import com.tomli.progressapp.ui.theme.ProgressAppTheme
-import kotlinx.coroutines.flow.single
-import kotlinx.coroutines.flow.toList
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -75,44 +66,40 @@ fun ScalesScreen(navController: NavController, id: Int, name: String, color: Str
     val isCreate = remember{ mutableStateOf(false)}
     val isChange=remember{ mutableStateOf(false)}
     val changingScale = remember { mutableStateOf(Scales(0, id, "Новая шкала", "Red", TypeScale.CheckList.name)) }
+
+    var textColor: Color
+    var buttonBack: Int
+    var buttonChange: Int
+    var buttonAdd: Int
+    if(isLightColor(color_theme.value)){
+        textColor = Color.Black
+        buttonBack = R.drawable.button_back_black
+        buttonChange = R.drawable.button_change_black
+        buttonAdd = R.drawable.button_add_black
+    }else{
+        textColor = Color.White
+        buttonBack = R.drawable.button_back
+        buttonChange = R.drawable.button_change
+        buttonAdd = R.drawable.button_add
+    }
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
         Row(modifier = Modifier.fillMaxWidth().background(Color(ColorsData.valueOf(color_theme.value).hex)).height(60.dp)){
-            if(isLightColor(color_theme.value)){
-                Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
+            Image(painter = painterResource(buttonBack), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
+                Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
 
-                Text(text = name_theme.value, color = Color.Black, lineHeight = 18.sp,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(text = name_theme.value, color = textColor, lineHeight = 18.sp,
+                modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
-                Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isThemeChange.value=true
-                    })
+            Image(painter = painterResource(buttonChange), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
+                .clickable{
+                    isThemeChange.value=true
+                })
 
-                Image(painter = painterResource(R.drawable.button_add_black), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isCreate.value=true
-                    })
-            }else{
-                Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically).clickable { navController.navigate("main_screen") })
-
-                Text(text = name_theme.value, color = Color.White, lineHeight = 18.sp,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
-
-                Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isThemeChange.value=true
-                    })
-
-                Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isCreate.value=true
-                    })
-            }
-
+            Image(painter = painterResource(buttonAdd), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
+                .clickable{
+                    isCreate.value=true
+                })
         }
         if(scales.value.isEmpty()){
             Box(modifier = Modifier.weight(1f).padding(20.dp)){

@@ -15,10 +15,6 @@ import kotlinx.coroutines.launch
 class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
     val themes=database.dao.allThemes()
 
-    var oneTheme = Themes(0, " ", "Black")
-    fun getOneTheme(id: Int)= viewModelScope.launch {
-        oneTheme = database.dao.oneTheme(id)
-    }
     fun addNewTheme(name: String, color: String) = viewModelScope.launch {
         database.dao.addTheme(name, color)
     }
@@ -51,9 +47,6 @@ class ProgressViewModel(val database: ProgressDB)  :ViewModel() {
 
     fun getCounter(id_scale: Int): Flow<List<Counter>>{
         return database.dao.counterInsideScale(id_scale)
-    }
-    fun addNewCounter(id_scale: Int, current_count: Int, max_count: Int)=viewModelScope.launch {
-        database.dao.addCounter(id_scale, current_count, max_count)
     }
     fun updateCurrentCount(id: Int, current_count: Int)=viewModelScope.launch {
         database.dao.updateCurrentCount(id, current_count)

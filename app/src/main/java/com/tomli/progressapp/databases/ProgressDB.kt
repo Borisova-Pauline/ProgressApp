@@ -13,7 +13,7 @@ abstract class ProgressDB : RoomDatabase() {
     abstract val dao: Dao
     companion object{
         fun createDB(context: Context): ProgressDB{
-            return Room.databaseBuilder(context, ProgressDB::class.java, "progressDB.db")//.fallbackToDestructiveMigration()
+            return Room.databaseBuilder(context, ProgressDB::class.java, "progressDB.db")
                 .createFromAsset("progressDB.db").build()
         }
     }

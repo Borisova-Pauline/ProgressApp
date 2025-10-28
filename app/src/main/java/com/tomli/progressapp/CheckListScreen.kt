@@ -29,7 +29,6 @@ import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
@@ -63,46 +62,43 @@ fun CheckListScreen(navController: NavController, id: Int, name: String, color: 
     val isCheckCreate = remember { mutableStateOf(false) }
     val isCheckChange = remember { mutableStateOf(false) }
     var changingCheck = remember { mutableStateOf(CheckList(0, id, 0, "Текст пункта")) }
+
+    var textColor: Color
+    var buttonBack: Int
+    var buttonChange: Int
+    var buttonAdd: Int
+    if(isLightColor(color_scale.value)){
+        textColor = Color.Black
+        buttonBack = R.drawable.button_back_black
+        buttonChange = R.drawable.button_change_black
+        buttonAdd = R.drawable.button_add_black
+    }else{
+        textColor = Color.White
+        buttonBack = R.drawable.button_back
+        buttonChange = R.drawable.button_change
+        buttonAdd = R.drawable.button_add
+    }
     Column(modifier = Modifier.fillMaxSize().padding(top = up, bottom = down)){
         Row(modifier = Modifier.fillMaxWidth().background(Color(ColorsData.valueOf(color_scale.value).hex)).height(60.dp)){
-            if(isLightColor(color_scale.value)){
-                Image(painter = painterResource(R.drawable.button_back_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically).clickable { navController.navigateUp() })
+            Image(painter = painterResource(buttonBack), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
+                Alignment.CenterVertically).clickable { navController.navigateUp() })
 
-                Text(text = name_scale.value, color = Color.Black,lineHeight = 18.sp,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
+            Text(text = name_scale.value, color = textColor,lineHeight = 18.sp,
+                modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
+                textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
 
-                Image(painter = painterResource(R.drawable.button_change_black), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically)
-                    .clickable{
-                        isScaleChange.value=true
-                    })
-                Image(painter = painterResource(R.drawable.button_add_black), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isCheckCreate.value=true
-                    })
-            }else{
-                Image(painter = painterResource(R.drawable.button_back), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically).clickable { navController.navigateUp() })
-
-                Text(text = name_scale.value, color = Color.White,lineHeight = 18.sp,
-                    modifier = Modifier.weight(1f).padding(10.dp).align(Alignment.CenterVertically),
-                    textAlign = TextAlign.Center, maxLines = 2, overflow = TextOverflow.Ellipsis)
-
-                Image(painter = painterResource(R.drawable.button_change), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
-                    Alignment.CenterVertically)
-                    .clickable{
-                        isScaleChange.value=true
-                    })
-                Image(painter = painterResource(R.drawable.button_add), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
-                    .clickable{
-                        isCheckCreate.value=true
-                    })
-            }
+            Image(painter = painterResource(buttonChange), contentDescription = "", modifier = Modifier.size(55.dp).padding(10.dp).align(
+                Alignment.CenterVertically)
+                .clickable{
+                    isScaleChange.value=true
+                })
+            Image(painter = painterResource(buttonAdd), contentDescription = "", modifier = Modifier.size(60.dp).padding(10.dp).align(Alignment.CenterVertically)
+                .clickable{
+                    isCheckCreate.value=true
+                })
         }
         val progress = progressViewModel.progress.collectAsState()
-        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
+        LinearProgressIndicator(progress = (progress.value), color = Color(ColorsData.valueOf(color_scale.value).hex), trackColor = Color(ColorsData.valueOf(color_scale.value).lightHex), modifier = Modifier.fillMaxWidth().height(100.dp).padding(10.dp))
         Text(text = "${(progress.value*100).toInt()}%", modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         if(check_list.value.isEmpty()){
             Box(modifier = Modifier.weight(1f).padding(20.dp)){

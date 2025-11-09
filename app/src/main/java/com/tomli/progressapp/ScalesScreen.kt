@@ -228,6 +228,7 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                         .clickable {
                             if(name.value.text!=""){
                                 if(isCounter.value){
+                                    maxCount.value = maxCount.value.trim()
                                     try{
                                         if(maxCount.value.toInt()>0){
                                             progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.Counter.name, maxCount.value.toInt())
@@ -236,7 +237,11 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
                                             Toast.makeText(context, "Максимальное число должно быть больше нуля", Toast.LENGTH_LONG).show()
                                         }
                                     }catch (e: Exception){
-                                        Toast.makeText(context, "Введите максимальное количество", Toast.LENGTH_LONG).show()
+                                        if(maxCount.value.contains(",") || maxCount.value.contains(".")){
+                                            Toast.makeText(context, "Максимальное число должно быть целым", Toast.LENGTH_LONG).show()
+                                        }else{
+                                            Toast.makeText(context, "Введите максимальное количество", Toast.LENGTH_LONG).show()
+                                        }
                                     }
                                 }else{
                                     progressViewModel.addNewScale(scale.id_theme!!, name.value.text, ColorsData.entries.get(colorIndex.value).name, TypeScale.CheckList.name)

@@ -65,7 +65,7 @@ fun ShortInstructionScreen(navController: NavController){
             )
         }
         Column(modifier = Modifier.padding(horizontal = 10.dp).verticalScroll(rememberScrollState())) {
-            Text(text = "Приложение $appName имеет 4 типа элементов: темы, шкалы, чек-листв и счётчики. На главном экране находятся все ваши темы.",
+            Text(text = "Приложение $appName имеет 4 типа элементов: темы, шкалы, чек-листы и счётчики. На главном экране находятся все ваши темы.",
                 textAlign = TextAlign.Justify)
             Column(modifier = Modifier
                 .padding(15.dp).align(Alignment.CenterHorizontally)){

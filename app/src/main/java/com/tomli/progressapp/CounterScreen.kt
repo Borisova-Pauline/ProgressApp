@@ -151,6 +151,8 @@ fun CounterDialog(counter: Counter, onDismiss:()-> Unit, progressViewModel: Prog
                 Card(modifier = Modifier.weight(1f).padding(5.dp)
                     .clickable {
                         try{
+                            newCurrentCount.value = newCurrentCount.value.trim()
+                            newMaxCount.value = newMaxCount.value.trim()
                             if(newCurrentCount.value.toInt()<=newMaxCount.value.toInt() && newCurrentCount.value.toInt()>=0 && newMaxCount.value.toInt()>0){
                                 progressViewModel.updateCurrentCount(counter.id!!, newCurrentCount.value.toInt())
                                 progressViewModel.changeMaxCount(counter.id!!, newMaxCount.value.toInt())
@@ -165,7 +167,11 @@ fun CounterDialog(counter: Counter, onDismiss:()-> Unit, progressViewModel: Prog
                                 Toast.makeText(context, mistake, Toast.LENGTH_LONG).show()
                             }
                         }catch (e: Exception){
-                            Toast.makeText(context, "Введите числа", Toast.LENGTH_LONG).show()
+                            if(newCurrentCount.value.contains(".") || newCurrentCount.value.contains(",") || newMaxCount.value.contains(".") || newMaxCount.value.contains(",")){
+                                Toast.makeText(context, "Числа должны быть целыми", Toast.LENGTH_LONG).show()
+                            }else{
+                                Toast.makeText(context, "Введите числа", Toast.LENGTH_LONG).show()
+                            }
                         }
 
                     }.align(Alignment.CenterVertically), shape = RoundedCornerShape(5.dp), border = BorderStroke(1.dp, Color.Black)

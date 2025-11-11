@@ -282,7 +282,7 @@ fun ScaleDialog(scale: Scales, isChange: Boolean, onDismiss:()-> Unit, isChangeI
             }
             if(isDelete.value){
                 AlertDialog(onDismissRequest = {isDelete.value=false},
-                    title = {Text(text="Удалить тему?")},
+                    title = {Text(text="Удалить шкалу?")},
                     text = {Text(text="Все записи внутри неё будут также удалены")},
                     confirmButton = {Text(text = "Удалить", modifier = Modifier.padding(5.dp)
                         .clickable { progressViewModel.deleteScale(scale.id!!); isDelete.value=false; onDismiss()})},
